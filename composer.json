@@ -1,6 +1,7 @@
 {
     "name": "magicoli/reclaim-details",
     "description": "Take back control of your WordPress plugin's details display, using local readme.txt and assets",
+    "version": "1.0.0",
     "type": "library",
     "keywords": ["wordpress", "plugin", "details", "readme", "independent"],
     "homepage": "https://github.com/magicoli/reclaim-details",
