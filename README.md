@@ -1,5 +1,6 @@
 # Reclaim Details
 
+[![Version](https://img.shields.io/badge/Version-1.0.0-green.svg)](https://github.com/magicoli/reclaim-details)
 [![License AGPLv3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![PHP 7.4+](https://img.shields.io/badge/PHP-%3E%3D7.4-8892BF.svg)](https://php.net/)
 [![PSR-4](https://img.shields.io/badge/PSR--4-compliant-brightgreen.svg)](https://www.php-fig.org/psr/psr-4/)
@@ -214,18 +215,18 @@ php -r "require 'autoload.php'; var_dump(class_exists('Reclaim\\Details\\Reclaim
 - **OSProjects Plugin** - The original implementation
 - *Your plugin here!* - Submit a PR to add your plugin
 
-## 🤝 **Contributing**
+## **Contributing**
 
 1. Fork the repository
 2. Create your feature branch
 3. Test with multiple plugin setups
 4. Submit a pull request
 
-## 📄 **License**
+## **License**
 
 This project is licensed under the AGPL-3.0-or-later License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 **Acknowledgments**
+## **Acknowledgments**
 
 
 - **capevace** for their [wp-package-parser](https://github.com/capevace/wp-package-parser) which saved me a lot of time... once I found it

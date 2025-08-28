@@ -6,7 +6,6 @@
  * Reusable, plugin-agnostic library - reclaim control of your plugin information display
  * 
  * @package Reclaim\Details
- * @version 1.0.0
  */
 
 namespace Reclaim\Details;
