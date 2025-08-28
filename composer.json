@@ -1,0 +1,28 @@
+{
+    "name": "magicoli/reclaim-details",
+    "description": "Take back control of your WordPress plugin's details display, using local readme.txt and assets",
+    "type": "library",
+    "keywords": ["wordpress", "plugin", "details", "readme", "independent"],
+    "homepage": "https://github.com/magicoli/reclaim-details",
+    "license": "AGPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Magiiic",
+            "email": "olivier@van-helden.net",
+            "homepage": "https://magiiic.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Reclaim\\Details\\": "src/Reclaim/Details/"
+        }
+    },
+    "support": {
+        "issues": "https://github.com/magicoli/reclaim-details/issues",
+        "source": "https://github.com/magicoli/reclaim-details"
+    },
+    "minimum-stability": "stable"
+}
