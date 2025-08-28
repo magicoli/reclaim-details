@@ -1,14 +1,14 @@
 # Reclaim Details
 
+[![License AGPLv3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![PHP 7.4+](https://img.shields.io/badge/PHP-%3E%3D7.4-8892BF.svg)](https://php.net/)
+[![PSR-4](https://img.shields.io/badge/PSR--4-compliant-brightgreen.svg)](https://www.php-fig.org/psr/psr-4/)
+
 > **Take back control of your WordPress plugin's details display**
 
 Reclaim Details is a zero-configuration library that enables WordPress plugins to display rich "View details" information using local `readme.txt` files and assets, independent of the WordPress.org repository.
 
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![PHP Version](https://img.shields.io/badge/PHP-%3E%3D7.4-8892BF.svg)](https://php.net/)
-[![PSR-4](https://img.shields.io/badge/PSR--4-compliant-brightgreen.svg)](https://www.php-fig.org/psr/psr-4/)
-
-## 🎯 **Why Reclaim Details?**
+## Why Reclaim Details?
 
 - **Independence**: Your plugin details aren't tied to WordPress.org
 - **Control**: Use your own `readme.txt` content and assets
@@ -16,7 +16,7 @@ Reclaim Details is a zero-configuration library that enables WordPress plugins t
 - **Zero config**: Auto-detects your plugin, no parameters needed
 - **Reusable**: Works with any WordPress plugin
 
-## 🚀 **Quick Start**
+## Quick Start
 
 ### Installation
 
@@ -40,12 +40,12 @@ new \Reclaim\Details\ReclaimDetails();
 ### That's It!
 
 No configuration needed. The library will:
-- ✅ Auto-detect your plugin
-- ✅ Parse your `readme.txt` file  
-- ✅ Add "View details" link to your plugin row
-- ✅ Display WordPress.org-style popup with your content
+- Auto-detect your plugin
+- Parse your `readme.txt` file  
+- Add "View details" link to your plugin row
+- Display WordPress.org-style popup with your content
 
-## 📋 **How It Works**
+## How It Works
 
 ### Before: Generic Plugin Row
 ```
@@ -63,7 +63,7 @@ Version 1.0.0 | By Author Name | Visit plugin site | View details
 
 Clicking **"View details"** opens a beautiful WordPress.org-style popup containing all your `readme.txt` content.
 
-## 📁 **Required Files**
+## Required Files
 
 The library reads from standard WordPress plugin structure:
 
@@ -110,7 +110,7 @@ Detailed description with **formatting**.
 * Initial release
 ```
 
-## ⚙️ **Advanced Usage**
+## **Advanced Usage**
 
 ### Manual Plugin Specification
 ```php
@@ -147,27 +147,27 @@ require_once __DIR__ . '/vendor/magicoli/reclaim-details/init.php';
 // Your plugin code...
 ```
 
-## 🎨 **Supported Content**
+## Supported Content
 
 ### Readme Sections
-- ✅ **Description** - Rich formatted content  
-- ✅ **Installation** - Step-by-step instructions
-- ✅ **Changelog** - Version history
-- ✅ **FAQ** - Frequently asked questions
-- ✅ **Screenshots** - Automatic asset detection
+- **Description** - Rich formatted content  
+- **Installation** - Step-by-step instructions
+- **Changelog** - Version history
+- **FAQ** - Frequently asked questions
+- **Screenshots** - Automatic asset detection
 
 ### Metadata
-- ✅ Plugin name, version, author
-- ✅ WordPress compatibility (`Requires at least`, `Tested up to`)
-- ✅ PHP version requirements
-- ✅ License information
+- Plugin name, version, author
+- WordPress compatibility (`Requires at least`, `Tested up to`)
+- PHP version requirements
+- License information
 
 ### Assets
-- ✅ Screenshots (`assets/screenshot-1.png`, etc.)
-- ✅ Banners (planned)
-- ✅ Icons (planned)
+- Screenshots (`assets/screenshot-1.png`, etc.)
+- Banners (planned)
+- Icons (planned)
 
-## 🔧 **Technical Details**
+## Technical Details
 
 ### Requirements
 - **PHP**: 7.4 or higher
@@ -181,7 +181,7 @@ require_once __DIR__ . '/vendor/magicoli/reclaim-details/init.php';
 - **WordPress Native**: Uses official `plugins_api` filter
 - **Memory Efficient**: Loads only when needed
 
-## 🏗️ **Architecture**
+## Architecture
 
 ```
 lib/reclaim-details/
@@ -192,7 +192,7 @@ lib/reclaim-details/
     └── ReclaimDetails.php   # Main class
 ```
 
-## 🚧 **Development**
+## Development
 
 ### Testing the Library
 ```bash
@@ -209,7 +209,7 @@ php -r "require 'autoload.php'; var_dump(class_exists('Reclaim\\Details\\Reclaim
 3. Look for "View details" in plugin description
 4. Click to verify popup content
 
-## 🎉 **Examples in the Wild**
+## Examples in the Wild
 
 - **OSProjects Plugin** - The original implementation
 - *Your plugin here!* - Submit a PR to add your plugin
@@ -227,14 +227,15 @@ This project is licensed under the AGPL-3.0-or-later License - see the [LICENSE]
 
 ## 🙏 **Acknowledgments**
 
+
+- **capevace** for their [wp-package-parser](https://github.com/capevace/wp-package-parser) which saved me a lot of time... once I found it
 - WordPress core team for the `plugins_api` system
 - The open source community for inspiration
 - Plugin developers who deserve control over their plugin presentation
 
----
-
 **Part of the Reclaim Suite**: Taking back control of WordPress plugin independence
-- 🔧 **Reclaim Details** - Plugin information display ✅
-- 🔄 **Reclaim Updates** - Plugin update system (coming soon)
+- [x] **Reclaim Details** - Plugin information display
+- [ ] **Reclaim Updates** - Plugin update system (coming soon)
 
-**Made with ❤️ by [Magiiic](https://magiiic.com)**
+---
+**Made with ❤️ by [Magìiíc](https://magiiic.com)**
