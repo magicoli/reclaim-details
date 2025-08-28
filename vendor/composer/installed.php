@@ -1,0 +1,41 @@
+<?php return array(
+    'root' => array(
+        'name' => 'magicoli/reclaim-details',
+        'pretty_version' => 'dev-master',
+        'version' => 'dev-master',
+        'reference' => '7d97e940d816323fac0b7cb96bb4800a0b83a6f7',
+        'type' => 'library',
+        'install_path' => __DIR__ . '/../../',
+        'aliases' => array(),
+        'dev' => true,
+    ),
+    'versions' => array(
+        'capevace/wp-package-parser' => array(
+            'pretty_version' => '1.0.0',
+            'version' => '1.0.0.0',
+            'reference' => '736f8a85d6bbb5fd8293973ccfda74e3b56ade4f',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../capevace/wp-package-parser',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'magicoli/reclaim-details' => array(
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
+            'reference' => '7d97e940d816323fac0b7cb96bb4800a0b83a6f7',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'michelf/php-markdown' => array(
+            'pretty_version' => '1.9.1',
+            'version' => '1.9.1.0',
+            'reference' => '5024d623c1a057dcd2d076d25b7d270a1d0d55f3',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../michelf/php-markdown',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+    ),
+);

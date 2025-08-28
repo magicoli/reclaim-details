@@ -142,47 +142,26 @@ class ReclaimDetails {
 	}
 	
 	/**
-	 * Parse WordPress readme.txt format
+	 * Parse WordPress readme.txt format using wp-package-parser
 	 */
 	private function parse_readme( $content ) {
-		$data = array();
+		$parsed = \WPPackageParser\Parser::parseReadme( $content, true ); // true = apply markdown formatting
 		
-		// Parse headers
-		preg_match( '/=== (.+) ===/', $content, $matches );
-		$data['name'] = isset( $matches[1] ) ? trim( $matches[1] ) : '';
-		
-		// Parse metadata
-		$lines = explode( "\n", $content );
-		foreach ( $lines as $line ) {
-			if ( preg_match( '/^([^:]+):\s*(.+)$/', trim( $line ), $matches ) ) {
-				$key = strtolower( str_replace( ' ', '_', trim( $matches[1] ) ) );
-				$data[ $key ] = trim( $matches[2] );
-			}
+		if ( ! $parsed || ! is_array( $parsed ) ) {
+			return array(); // Return empty array if parsing fails
 		}
 		
-		// Parse sections
-		$sections = array();
-		$current_section = '';
-		$in_section = false;
-		
-		foreach ( $lines as $line ) {
-			$line = trim( $line );
-			
-			// Section headers
-			if ( preg_match( '/^== (.+) ==$/', $line, $matches ) ) {
-				$current_section = strtolower( str_replace( ' ', '_', $matches[1] ) );
-				$sections[ $current_section ] = '';
-				$in_section = true;
-				continue;
-			}
-			
-			// Content
-			if ( $in_section && ! empty( $line ) && ! preg_match( '/^=/', $line ) ) {
-				$sections[ $current_section ] .= $line . "\n";
-			}
-		}
-		
-		$data['sections'] = $sections;
+		// Convert to our expected format
+		$data = array(
+			'name' => $parsed['name'] ?? '',
+			'contributors' => $parsed['contributors'] ?? array(),
+			'tags' => $parsed['tags'] ?? array(),
+			'requires_at_least' => $parsed['requires'] ?? '',
+			'tested_up_to' => $parsed['tested'] ?? '',
+			'stable_tag' => $parsed['stable'] ?? '',
+			'short_description' => $parsed['short_description'] ?? '',
+			'sections' => $parsed['sections'] ?? array(), // Already formatted with HTML
+		);
 		
 		return $data;
 	}
@@ -260,24 +239,12 @@ class ReclaimDetails {
 		$plugin_info->added = '2025-08-28';
 		$plugin_info->download_link = $this->plugin_data['PluginURI'] . '/releases/latest';
 		
-		// Sections from readme.txt
-		$plugin_info->sections = array();
+		// Banner and icons from assets
+		$plugin_info->banners = $this->get_banners();
+		$plugin_info->icons = $this->get_icons();
 		
-		if ( isset( $this->readme_data['sections']['description'] ) ) {
-			$plugin_info->sections['description'] = $this->format_section_content( $this->readme_data['sections']['description'] );
-		}
-		
-		if ( isset( $this->readme_data['sections']['installation'] ) ) {
-			$plugin_info->sections['installation'] = $this->format_section_content( $this->readme_data['sections']['installation'] );
-		}
-		
-		if ( isset( $this->readme_data['sections']['changelog'] ) ) {
-			$plugin_info->sections['changelog'] = $this->format_section_content( $this->readme_data['sections']['changelog'] );
-		}
-		
-		if ( isset( $this->readme_data['sections']['faq'] ) ) {
-			$plugin_info->sections['faq'] = $this->format_section_content( $this->readme_data['sections']['faq'] );
-		}
+		// Process all sections from readme.txt
+		$plugin_info->sections = $this->process_sections();
 		
 		// Screenshots (if assets exist)
 		$plugin_info->screenshots = $this->get_screenshots();
@@ -286,27 +253,54 @@ class ReclaimDetails {
 	}
 	
 	/**
-	 * Format section content (convert basic markdown-like syntax to HTML)
+	 * Process all readme sections into appropriate tabs
 	 */
-	private function format_section_content( $content ) {
-		$content = trim( $content );
+	private function process_sections() {
+		if ( empty( $this->readme_data['sections'] ) ) {
+			return array();
+		}
 		
-		// Convert = headings =
-		$content = preg_replace( '/^= (.+) =$/', '<h3>$1</h3>', $content );
+		$all_sections = $this->readme_data['sections'];
 		
-		// Convert * lists
-		$content = preg_replace( '/^\* (.+)$/m', '<li>$1</li>', $content );
+		// Define which sections get their own tabs
+		$dedicated_tabs = array( 'installation', 'changelog', 'faq', 'troubleshooting', 'developers' );
 		
-		// Wrap consecutive <li> in <ul>
-		$content = preg_replace( '/(<li>.*<\/li>)/s', '<ul>$1</ul>', $content );
+		// Extract dedicated tab sections (case-insensitive)
+		$tab_sections = array();
+		foreach ( $all_sections as $section_key => $section_content ) {
+			$section_key_lower = strtolower( str_replace( ' ', '_', $section_key ) );
+			if ( in_array( $section_key_lower, $dedicated_tabs ) ) {
+				$tab_sections[ $section_key_lower ] = $section_content;
+				unset( $all_sections[ $section_key ] ); // Remove from main array
+			}
+		}
 		
-		// Convert line breaks to paragraphs
-		$content = wpautop( $content );
+		// Build description from remaining sections
+		$description_parts = array();
+		foreach ( $all_sections as $section_key => $section_content ) {
+			if ( empty( trim( $section_content ) ) ) {
+				continue;
+			}
+			
+			if ( strtolower( $section_key ) === 'description' ) {
+				// Description goes first
+				array_unshift( $description_parts, $section_content );
+			} else {
+				// Other sections get added with headers
+				$description_parts[] = "<h4>" . esc_html( $section_key ) . "</h4>\n" . $section_content;
+			}
+		}
 		
-		return $content;
+		// Combine everything
+		$sections = array();
+		if ( ! empty( $description_parts ) ) {
+			$sections['description'] = implode( "\n\n", $description_parts );
+		}
+		
+		return array_merge( $sections, $tab_sections );
 	}
 	
-	/**
+    /**
 	 * Get screenshots from assets directory
 	 */
 	private function get_screenshots() {
@@ -322,14 +316,101 @@ class ReclaimDetails {
 		
 		foreach ( $files as $file ) {
 			if ( preg_match( '/screenshot-(\d+)\./', basename( $file ), $matches ) ) {
-				$screenshots[ $matches[1] ] = array(
+				$num = $matches[1];
+				$screenshots[ $num ] = array(
 					'src' => plugins_url( 'assets/' . basename( $file ), $this->plugin_file ),
-					'caption' => 'Screenshot ' . $matches[1]
+					'caption' => $this->get_screenshot_caption( $num )
 				);
 			}
 		}
 		
 		ksort( $screenshots );
 		return $screenshots;
+	}
+	
+	/**
+	 * Get screenshot caption from readme.txt
+	 */
+	private function get_screenshot_caption( $num ) {
+		if ( ! isset( $this->readme_data['sections']['screenshots'] ) ) {
+			return 'Screenshot ' . $num;
+		}
+		
+		$screenshots_content = $this->readme_data['sections']['screenshots'];
+		$lines = explode( "\n", $screenshots_content );
+		
+		foreach ( $lines as $line ) {
+			if ( preg_match( '/^' . $num . '\.\s*(.+)$/', trim( $line ), $matches ) ) {
+				return trim( $matches[1] );
+			}
+		}
+		
+		return 'Screenshot ' . $num;
+	}
+	
+	/**
+	 * Get plugin banners from assets directory
+	 */
+	private function get_banners() {
+		$banners = array();
+		$assets_dir = $this->plugin_dir . '/assets';
+		
+		if ( ! is_dir( $assets_dir ) ) {
+			return $banners;
+		}
+		
+		// High resolution banner (1544x500)
+		$banner_2x = $assets_dir . '/banner-1544x500.png';
+		if ( file_exists( $banner_2x ) ) {
+			$banners['high'] = plugins_url( 'assets/banner-1544x500.png', $this->plugin_file );
+		} elseif ( file_exists( str_replace( '.png', '.jpg', $banner_2x ) ) ) {
+			$banners['high'] = plugins_url( 'assets/banner-1544x500.jpg', $this->plugin_file );
+		}
+		
+		// Standard resolution banner (772x250)
+		$banner_1x = $assets_dir . '/banner-772x250.png';
+		if ( file_exists( $banner_1x ) ) {
+			$banners['low'] = plugins_url( 'assets/banner-772x250.png', $this->plugin_file );
+		} elseif ( file_exists( str_replace( '.png', '.jpg', $banner_1x ) ) ) {
+			$banners['low'] = plugins_url( 'assets/banner-772x250.jpg', $this->plugin_file );
+		}
+		
+		return $banners;
+	}
+	
+	/**
+	 * Get plugin icons from assets directory
+	 */
+	private function get_icons() {
+		$icons = array();
+		$assets_dir = $this->plugin_dir . '/assets';
+		
+		if ( ! is_dir( $assets_dir ) ) {
+			return $icons;
+		}
+		
+		// High resolution icon (256x256)
+		$icon_2x = $assets_dir . '/icon-256x256.png';
+		if ( file_exists( $icon_2x ) ) {
+			$icons['2x'] = plugins_url( 'assets/icon-256x256.png', $this->plugin_file );
+		} elseif ( file_exists( str_replace( '.png', '.jpg', $icon_2x ) ) ) {
+			$icons['2x'] = plugins_url( 'assets/icon-256x256.jpg', $this->plugin_file );
+		}
+		
+		// Standard resolution icon (128x128)
+		$icon_1x = $assets_dir . '/icon-128x128.png';
+		if ( file_exists( $icon_1x ) ) {
+			$icons['1x'] = plugins_url( 'assets/icon-128x128.png', $this->plugin_file );
+		} elseif ( file_exists( str_replace( '.png', '.jpg', $icon_1x ) ) ) {
+			$icons['1x'] = plugins_url( 'assets/icon-128x128.jpg', $this->plugin_file );
+		}
+		
+		// SVG icon (preferred)
+		$icon_svg = $assets_dir . '/icon.svg';
+		if ( file_exists( $icon_svg ) ) {
+			$icons['svg'] = plugins_url( 'assets/icon.svg', $this->plugin_file );
+		}
+		
+		return $icons;
 	}
 }
