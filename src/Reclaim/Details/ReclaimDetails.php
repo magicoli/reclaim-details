@@ -144,7 +144,8 @@ class ReclaimDetails {
 	 * Parse WordPress readme.txt format using wp-package-parser
 	 */
 	private function parse_readme( $content ) {
-		$parsed = \WPPackageParser\Parser::parseReadme( $content, true ); // true = apply markdown formatting
+		// Decode UTF-8 encoding before parsing to prevent double-encoding issues
+		$parsed = \WPPackageParser\Parser::parseReadme( utf8_decode( $content ), true ); // true = apply markdown formatting
 		
 		if ( ! $parsed || ! is_array( $parsed ) ) {
 			return array(); // Return empty array if parsing fails
@@ -159,7 +160,7 @@ class ReclaimDetails {
 			'tested_up_to' => $parsed['tested'] ?? '',
 			'stable_tag' => $parsed['stable'] ?? '',
 			'short_description' => $parsed['short_description'] ?? '',
-			'sections' => $parsed['sections'] ?? array(), // Already formatted with HTML
+			'sections' => $parsed['sections'] ?? array(),
 		);
 		
 		return $data;
@@ -331,16 +332,26 @@ class ReclaimDetails {
 	 * Get screenshot caption from readme.txt
 	 */
 	private function get_screenshot_caption( $num ) {
-		if ( ! isset( $this->readme_data['sections']['screenshots'] ) ) {
+		if ( ! isset( $this->readme_data['sections']['Screenshots'] ) ) {
 			return 'Screenshot ' . $num;
 		}
 		
-		$screenshots_content = $this->readme_data['sections']['screenshots'];
-		$lines = explode( "\n", $screenshots_content );
+		$screenshots_content = $this->readme_data['sections']['Screenshots'];
 		
-		foreach ( $lines as $line ) {
-			if ( preg_match( '/^' . $num . '\.\s*(.+)$/', trim( $line ), $matches ) ) {
-				return trim( $matches[1] );
+		// Handle HTML format (after markdown processing)
+		if ( strpos( $screenshots_content, '<li>' ) !== false ) {
+			// Extract list items and match by position
+			preg_match_all( '/<li>(.*?)<\/li>/s', $screenshots_content, $matches );
+			if ( isset( $matches[1][ $num - 1 ] ) ) {
+				return strip_tags( trim( $matches[1][ $num - 1 ] ) );
+			}
+		} else {
+			// Plain text format (fallback)
+			$lines = explode( "\n", $screenshots_content );
+			foreach ( $lines as $line ) {
+				if ( preg_match( '/^' . $num . '\.\s*(.+)$/', trim( $line ), $matches ) ) {
+					return trim( $matches[1] );
+				}
 			}
 		}
 		
