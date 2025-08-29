@@ -264,14 +264,27 @@ class ReclaimDetails {
 		
 		$all_sections = $this->readme_data['sections'];
 		
+        // Use standard section titles (for reference, wp-admin/includes/plugin-install.php)
+        $plugins_section_titles = array(
+            'description'  => _x( 'Description', 'Plugin installer section title' ),
+            'installation' => _x( 'Installation', 'Plugin installer section title' ),
+            'faq'          => _x( 'FAQ', 'Plugin installer section title' ),
+            'screenshots'  => _x( 'Screenshots', 'Plugin installer section title' ),
+            'changelog'    => _x( 'Changelog', 'Plugin installer section title' ),
+            'reviews'      => _x( 'Reviews', 'Plugin installer section title' ),
+            'other_notes'  => _x( 'Other Notes', 'Plugin installer section title' ),
+        );
+        
 		// Define which sections get their own tabs (matching WordPress core)
-		$dedicated_tabs = array( 'description', 'installation', 'faq', 'screenshots', 'changelog', 'reviews', 'other_notes' );
-		
-		// Extract dedicated tab sections (case-insensitive)
-		$tab_sections = array();
+		$dedicated_tabs = array_keys( $plugins_section_titles );
+
+        // Set $tab_sections with same keys but empty values
+        $tab_sections = array_fill_keys( $dedicated_tabs, null );
+
+        // Extract dedicated tab sections (case-insensitive)
 		foreach ( $all_sections as $section_key => $section_content ) {
 			$section_key_lower = strtolower( str_replace( ' ', '_', $section_key ) );
-			if ( in_array( $section_key_lower, $dedicated_tabs ) ) {
+			if ( in_array( $section_key_lower, $dedicated_tabs ) && $section_key_lower !== 'description' ) {
 				$tab_sections[ $section_key_lower ] = $section_content;
 				unset( $all_sections[ $section_key ] ); // Remove from main array
 			}
@@ -293,20 +306,17 @@ class ReclaimDetails {
 			}
 		}
 		
-		// Combine everything
-		$sections = array();
 		if ( ! empty( $description_parts ) ) {
-			$sections['description'] = implode( "\n\n", $description_parts );
+			$tab_sections['description'] = implode( "\n\n", $description_parts );
 		}
-		
-		$final_sections = array_merge( $sections, $tab_sections );
 		
 		// Process screenshots section to replace numbered items with actual images
-		if ( isset( $final_sections['screenshots'] ) ) {
-			$final_sections['screenshots'] = $this->process_screenshots_section( $final_sections['screenshots'] );
+		if ( ! empty( $tab_sections['screenshots'] ) ) {
+			$tab_sections['screenshots'] = $this->process_screenshots_section( $tab_sections['screenshots'] );
 		}
 		
-		return $final_sections;
+        $tab_sections = array_filter( $tab_sections ); // Remove empty sections
+		return $tab_sections;
 	}
 	
 	/**
