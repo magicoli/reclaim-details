@@ -248,7 +248,9 @@ class ReclaimDetails {
 		
 		// Screenshots (if assets exist)
 		$plugin_info->screenshots = $this->get_screenshots();
-		
+        // echo "<pre>" . print_r($plugin_info->screenshots, true) . "</pre>";
+        // die();
+        
 		return $plugin_info;
 	}
 	
@@ -262,8 +264,8 @@ class ReclaimDetails {
 		
 		$all_sections = $this->readme_data['sections'];
 		
-		// Define which sections get their own tabs
-		$dedicated_tabs = array( 'installation', 'changelog', 'faq', 'troubleshooting', 'developers' );
+		// Define which sections get their own tabs (matching WordPress core)
+		$dedicated_tabs = array( 'description', 'installation', 'faq', 'screenshots', 'changelog', 'reviews', 'other_notes' );
 		
 		// Extract dedicated tab sections (case-insensitive)
 		$tab_sections = array();
@@ -297,7 +299,53 @@ class ReclaimDetails {
 			$sections['description'] = implode( "\n\n", $description_parts );
 		}
 		
-		return array_merge( $sections, $tab_sections );
+		$final_sections = array_merge( $sections, $tab_sections );
+		
+		// Process screenshots section to replace numbered items with actual images
+		if ( isset( $final_sections['screenshots'] ) ) {
+			$final_sections['screenshots'] = $this->process_screenshots_section( $final_sections['screenshots'] );
+		}
+		
+		return $final_sections;
+	}
+	
+	/**
+	 * Process screenshots section to replace numbered items with actual images
+	 */
+	private function process_screenshots_section( $content ) {
+		// Get available screenshots
+		$screenshots = $this->get_screenshots();
+		
+		if ( empty( $screenshots ) ) {
+			return $content; // No screenshots available, return content as-is
+		}
+		
+		// Replace ordered list items with actual images
+		// The list items are in order, so we can map them to screenshot numbers
+		$screenshot_index = 1;
+		
+		$content = preg_replace_callback(
+			'/<li>([^<]+)<\/li>/',
+			function( $matches ) use ( $screenshots, &$screenshot_index ) {
+				$caption = trim( $matches[1] );
+				
+				// If we have a screenshot for this index, replace with image
+				if ( isset( $screenshots[ $screenshot_index ] ) ) {
+					$src = esc_url( $screenshots[ $screenshot_index ]['src'] );
+					$alt = esc_attr( $caption );
+					$result = "<li><img src=\"{$src}\" alt=\"{$alt}\" style=\"max-width: 100%; height: auto;\" /><br><em>{$caption}</em></li>";
+					$screenshot_index++;
+					return $result;
+				}
+				
+				// No screenshot for this index, keep original
+				$screenshot_index++;
+				return $matches[0];
+			},
+			$content
+		);
+		
+		return $content;
 	}
 	
     /**
